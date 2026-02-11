@@ -1,5 +1,6 @@
 Tensorflow implementation of diffractive wave propagation and DDNNs.
 
+![HologramPropoagationGIF](./HologramPropagationHQ.gif)
 ## Installation 
 
 Use "pip install -e ." in the main folder to install files systemwide in developer mode.
