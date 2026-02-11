@@ -1,0 +1,149 @@
+Metadata-Version: 2.4
+Name: PhaseplateNetwork
+Version: 0.1.0
+Summary: Backpropagatable wave propagation in tensorflow for phase plate optimization and optical/acoustic diffractive systems
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: tensorflow
+Requires-Dist: tensorflow-probability
+Requires-Dist: numpy
+Requires-Dist: scikit-image
+
+Tensorflow implementation of diffractive wave propagation and DDNNs.
+
+## Installation 
+
+Use "pip install -e ." in the main folder to install files systemwide in developer mode.
+
+## Usage
+
+The project contains multiple backpropagatable layers that simulate wave diffraction with the angular spectrum method and thin phaseplates
+
+The main objects to interact with are:
+
+### WavePropagation
+```
+#For usage include: 
+PhaseplateNetwork.TFModules.OpticalLayers.WavePropagation
+
+#Constructor head
+    def __init__(self, z, N, L, padding = None, f0=2.00e6, cM=1484, channels_last = True, use_FT=True, **kwargs):
+        '''
+        Create the Propagation Layer
+        :param z: propagation distance
+        :param N: Pixel number
+        :param L: Propagation area size in [m]
+        :param padding: The amount of padding on the side of the propagation. If this is zero, wraparound artifacts start to interferre
+        :param f0: Frequency in 1/s
+        :param cM: Wavespeed in medium in [m]/s
+        :param channels_last: Bool if the image channels are last
+        :param use_FT: Use the angular spectrum method or the matrix multiplication method
+        :param kwargs: Stuff for keras
+        '''
+```
+
+This layer uses the angular spectrum method to propagate a wave field a distance z by using fourier transform operations. This can be switched to matrix multiplication, but this is slower and takes way more memory.
+The layer takes a (batch_num, img_size, img_size, 1) or (batch_num, img_size, img_size, 2) tensor (with polarization or no polarization) and propagates it a distance z and returns the output. During propagation the image is padded with the padding size "padding" in meters on both sides. When padding is "None" it by default is set to L/2. 
+This mitigates wraparound artifacts that are introduced by periodic boundary conditions in the discrete fourier transforms. 
+
+### Phaseplate 
+```  
+#For usage include: 
+from PhaseplateNetwork.TFModules.OpticalLayers.Phaseplate import Phaseplate
+
+
+#Constructor head
+ def __init__(self, shape, scale = 2, amplitude_trainable = False, phase_trainable = True, initialization = 'zeros', **kwargs):
+        '''
+        A simple layer to multiply the incoming complex field with a phase plate that has (possible trainable) amplitude and phase
+        shape: the input shape of the image
+        scale: upscale the plate
+        amplitude_trainable: weather the amplitude of the phaseplate is trainable
+        phase_trainable: makes the phase of the phaseplate trainable (enabled by default)
+        initialization: The initialization parameter given the the phase part of the phaseplate. defaults to zero, since random values gives essentially a diffuser and give no good gradient
+        '''
+```
+This layer multiplies an incoming wave field with of size (batch_num, img_size, img_size, 1/2) with a phaseplate of size (batch_num, shape[0]*scale, shape[1]*scale, 1). This plate is learnable in amplitude and/or phase.
+
+### Padding/Cropping layers.
+For convinience I created padding and cropping layers for the images that take in sizes in meters, instead of pixel values. These layers take in the same arguments, though one padds the image with a constant, and the other one crops it in the middle. 
+
+```
+#usage:
+from PhaseplateNetwork.TFModules.OpticalLayers.PaddingLayer import PaddingLayer
+
+#Constructor head
+    def __init__(self,image_size, L, padding,constant = 0.0, **kwargs):
+        '''
+        Pads an image of size L up to a size padding on both sides of each dimension
+        image_size: the 1 or 2 dimensional image size
+        L: size of the incoming image in meters
+        padding: padding to be applied to both!! sides in meters
+        '''
+```
+
+```
+#usage
+from PhaseplateNetwork.TFModules.OpticalLayers.CropLayer import CropLayer
+
+#constructor head
+    def __init__(self,image_size, L, padding, **kwargs):
+        '''
+        Crops an image that has been padded by the padding layer back to size
+        image_size: input image size in pixels (padded image size).
+        L: Size of the resulting image in m
+        padding: size of the padding area in m
+        '''
+```
+
+### Training a simple Hologram
+
+The following code should be able to create a simple hologram
+
+```
+import PhaseplateNetwork.TFModules.OpticalLayers as OL
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+from PhaseplateNetwork.utils.data_utils import get_minerva_optimization_dataset
+
+class HologramModel(tf.keras.Model):
+    def __init__(self, **kwargs):
+        super(HologramModel,self).__init__(**kwargs)
+        self.wave_propagation = OL.WavePropagation(0.1, 100, 0.1, padding = 0.2, f0 = 2.00e6, cM = 1484)
+        self.phase_plate = OL.PhasePlate( [100,100], scale =1 )
+        
+    def call(self, input):
+        '''
+            Takes in an amplitude of shape (1, 100,100,1) and gives the propagated amplitude at the output plane 0.1 m from the input transducer
+        '''
+        input_complex = tf.complex(input,0.0)# create input field with amplitude "input" and phase of 0
+        hologram = self.phase_plate(input_complex)
+        output = self.wave_propagation(hologram)
+        return tf.abs(output)
+
+hologram_model = HologramModel()
+
+train, test = get_minerva_optimization_dataset(32, 100, 0.1, 0.4) #Creates batches of 32 images of the same input and output (test dataset contains the same image)
+
+loss = tf.keras.losses.mse
+#optimizer = tf.keras.optimizers.SGD(100, momentum = 0.1) #Stochastic gradient descent with momentum
+optimizer = tf.keras.optimizers.Adam(0.1) #Adam optimizer (just works)
+hologram_model.compile(loss = loss, optimizer= optimizer)
+hologram_model.fit(train,epochs = 60)
+
+```
+Dataset overview
+
+![Minerva dataset input and wanted output](MinervaDataset.png)
+
+
+Trained Hologram comparison
+
+![Wanted output and output field of the hologram](OutputComparison.png)
+
+
+Phase of the hologram plate
+
+![Phaseplate (hologram plate)](PhaseHologram.png)
+

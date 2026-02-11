@@ -1,0 +1,13 @@
+[project]
+name = "PhaseplateNetwork"
+version = "0.1.0"
+description = "Backpropagatable wave propagation in tensorflow for phase plate optimization and optical/acoustic diffractive systems"
+readme = "README.md"
+requires-python = ">=3.8"
+
+dependencies = [
+    "tensorflow",
+    "tensorflow-probability",
+    "numpy",
+    "scikit-image"
+]
