@@ -1,0 +1,279 @@
+{
+    "class_name": "DDNN",
+    "config": {
+        "trainable_pixel": 112,
+        "scaling": 2,
+        "propagation_pixel": 224,
+        "padding": 0.00175,
+        "f0": 384300000000000.0,
+        "cM": 300000000.0,
+        "elements": [
+            {   "name": "abs_to_x_y_pol_layer",
+                "class_name": "AmplitudeToJonesPolarizationLayer",
+                "input_shape":[
+                    null,
+                    244,
+                    244,
+                    1
+                ],
+                "config": 
+                {
+                }
+            },
+            {
+                "name": "padding_layer",
+                "class_name": "PaddingLayer",
+                "input_shape": [
+                    null,
+                    224,
+                    224,
+                    2
+                ],
+                "config": {
+                    "image_size": [
+                        224,
+                        224
+                    ],
+                    "L": [
+                        0.001792,
+                        0.001792
+                    ],
+                    "padding": [
+                        0.00175,
+                        0.00175
+                    ],
+                    "constant": 0.0
+                }
+            },
+            {
+                "name": "wave_propagation",
+                "class_name": "WavePropagation",
+                "input_shape": [
+                    null,
+                    662,
+                    662,
+                    2
+                ],
+                "config": {
+                    "z": [
+                        0.04
+                    ],
+                    "N": 662,
+                    "L": 0.005292,
+                    "padding": 0.00175,
+                    "f0": 384300000000000.0,
+                    "cM": 300000000.0,
+                    "channels_last": true,
+                    "use_FT": true
+                }
+            },
+            {
+                "name": "jones_phase_plate",
+                "class_name": "JonesPhasePlate",
+                "input_shape": [
+                    null,
+                    662,
+                    662,
+                    2
+                ],
+                "config": {
+                    "shape": [
+                        112,
+                        112
+                    ],
+                    "scale": 2,
+                    "amplitude_trainable": false,
+                    "phase_trainable": true,
+                    "action" : "x"
+                }
+            },
+            {
+                "name": "wave_propagation_1",
+                "class_name": "WavePropagation",
+                "input_shape": [
+                    null,
+                    662,
+                    662,
+                    2
+                ],
+                "config": {
+                    "z": [
+                        0.08
+                    ],
+                    "N": 662,
+                    "L": 0.005292,
+                    "padding": 0.00175,
+                    "f0": 384300000000000.0,
+                    "cM": 300000000.0,
+                    "channels_last": true,
+                    "use_FT": true
+                }
+            },
+            {
+                "name": "jones_phase_plate_1",
+                "class_name": "JonesPhasePlate",
+                "input_shape": [
+                    null,
+                    662,
+                    662,
+                    2
+                ],
+                "config": {
+                    "shape": [
+                        112,
+                        112
+                    ],
+                    "scale": 2,
+                    "amplitude_trainable": false,
+                    "phase_trainable": true,
+                    "action": "x"
+                }
+            },
+            {
+                "name": "wave_propagation_2",
+                "class_name": "WavePropagation",
+                "input_shape": [
+                    null,
+                    662,
+                    662,
+                    2
+                ],
+                "config": {
+                    "z": [
+                        0.08
+                    ],
+                    "N": 662,
+                    "L": 0.005292,
+                    "padding": 0.00175,
+                    "f0": 384300000000000.0,
+                    "cM": 300000000.0,
+                    "channels_last": true,
+                    "use_FT": true
+                }
+            },
+            {
+                "name": "jones_phase_plate_2",
+                "class_name": "JonesPhasePlate",
+                "input_shape": [
+                    null,
+                    662,
+                    662,
+                    2
+                ],
+                "config": {
+                    "shape": [
+                        112,
+                        112
+                    ],
+                    "scale": 2,
+                    "amplitude_trainable": false,
+                    "phase_trainable": true,
+                    "action" : "x"
+                }
+            },
+            {
+                "name": "wave_propagation_3",
+                "class_name": "WavePropagation",
+                "input_shape": [
+                    null,
+                    662,
+                    662,
+                    2
+                ],
+                "config": {
+                    "z": [
+                        0.08
+                    ],
+                    "N": 662,
+                    "L": 0.005292,
+                    "padding": 0.00175,
+                    "f0": 384300000000000.0,
+                    "cM": 300000000.0,
+                    "channels_last": true,
+                    "use_FT": true
+                }
+            },
+            {
+                "name": "jones_phase_plate_3",
+                "class_name": "JonesPhasePlate",
+                "input_shape": [
+                    null,
+                    662,
+                    662,
+                    2
+                ],
+                "config": {
+                    "shape": [
+                        112,
+                        112
+                    ],
+                    "scale": 2,
+                    "amplitude_trainable": false,
+                    "phase_trainable": true,
+                    "action": "x"
+                }
+            },
+            {
+                "name": "wave_propagation_4",
+                "class_name": "WavePropagation",
+                "input_shape": [
+                    null,
+                    662,
+                    662,
+                    2
+                ],
+                "config": {
+                    "z": [
+                        0.13
+                    ],
+                    "N": 662,
+                    "L": 0.005292,
+                    "padding": 0.00175,
+                    "f0": 384300000000000.0,
+                    "cM": 300000000.0,
+                    "channels_last": true,
+                    "use_FT": true
+                }
+            },
+            {
+                "name": "crop_layer_5",
+                "class_name": "CropLayer",
+                "input_shape": [
+                    null,
+                    662,
+                    662,
+                    2
+                ],
+                "config": {
+                    "image_size": [
+                        662,
+                        662
+                    ],
+                    "L": [
+                        0.001792,
+                        0.001792
+                    ],
+                    "padding": [
+                        0.00175,
+                        0.00175
+                    ]
+                }
+            },
+            {   
+                "name": "abs_from_jones_pol_1",
+                "class_name": "AbsFromJonesPolarizationLayer",
+                "input_shape":[
+                    null,
+                    244,
+                    244,
+                    2
+                ],
+                "config": 
+                {
+                }
+            }
+        ]
+    },
+    "keras_version": "2.4.0",
+    "backend": "tensorflow"
+}
